@@ -296,6 +296,27 @@ require('lazy').setup({
   -- NOTE: Plugins can be added via a link or github org/name. To run setup automatically, use `opts = {}`
   { 'NMAC427/guess-indent.nvim', opts = {} },
 
+  -- VSCode-style side-by-side diff with character-level highlighting
+  {
+    'esmuellert/codediff.nvim',
+    cmd = 'CodeDiff',
+    opts = {
+      explorer = {
+        view_mode = 'tree',
+        indent_markers = true,
+        flatten_dirs = true,
+      },
+      keymaps = {
+        view = {
+          next_file = '<Tab>',
+          prev_file = '<S-Tab>',
+          next_hunk = '<C-n>',
+          prev_hunk = '<C-e>',
+        },
+      },
+    },
+  },
+
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
   --    {
