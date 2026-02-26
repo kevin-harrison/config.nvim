@@ -84,6 +84,14 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- Ensure JAVA_HOME is set for Mason and LSP subprocesses (sdkman doesn't propagate to child shells)
+if not vim.env.JAVA_HOME then
+  local java_home = vim.fn.expand '~/.sdkman/candidates/java/current'
+  if vim.uv.fs_stat(java_home) then
+    vim.env.JAVA_HOME = java_home
+  end
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -680,7 +688,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'lua-language-server',
-        'rust-analyzer', -- Mason name differs from lspconfig name (rust_analyzer)
+        'rust-analyzer',
+        'jdtls',
         'stylua',
         'isort',
         'black',
@@ -697,6 +706,28 @@ require('lazy').setup({
       -- rust_analyzer: configured separately because Mason name (rust-analyzer) differs
       vim.lsp.config('rust_analyzer', { capabilities = capabilities })
       vim.lsp.enable 'rust_analyzer'
+
+      -- java-language-server: for Bazel monorepo only (jdtls doesn't support Bazel)
+      -- Installed manually because Mason's install uses /usr/libexec/java_home which
+      -- doesn't work with sdkman-only Java installs. Steps:
+      --   1. git clone https://github.com/georgewfraser/java-language-server ~/.local/share/java-language-server
+      --   2. cd ~/.local/share/java-language-server
+      --   3. ./scripts/download_mac_jdk.sh
+      --   4. Build the jlink runtime with Java 21 (link_mac.sh may fail without system Java):
+      --      ~/.sdkman/candidates/java/21.0.4-amzn/bin/jlink \
+      --        --add-modules java.base,java.compiler,java.logging,java.sql,java.xml,jdk.compiler,jdk.jdi,jdk.unsupported,jdk.zipfs \
+      --        --output dist/mac --no-header-files --no-man-pages --compress 2
+      --   5. sdk use java 21.0.4-amzn && mvn package -DskipTests
+      --   NOTE: jlink and mvn must use the same Java version (21)
+      -- Monorepo also needs an empty WORKSPACE file at root: touch ~/code/services-pilot/WORKSPACE
+      local jls_path = vim.fn.expand '~/.local/share/java-language-server'
+      vim.lsp.config('java_language_server', {
+        cmd = { jls_path .. '/dist/lang_server_mac.sh' },
+        capabilities = capabilities,
+        filetypes = { 'java' },
+        root_markers = { 'BUILD.bazel' },
+      })
+      vim.lsp.enable 'java_language_server'
 
       -- Special Lua Config, as recommended by neovim help docs
       vim.lsp.config('lua_ls', {
@@ -920,7 +951,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     config = function()
-      local filetypes = { 'bash', 'c', 'diff', 'html', 'json', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'rust', 'vim', 'vimdoc' }
+      local filetypes = { 'bash', 'c', 'diff', 'html', 'java', 'json', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'proto', 'query', 'rust', 'toml', 'vim', 'vimdoc', 'yaml' }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
         pattern = filetypes,
@@ -944,6 +975,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.java',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
