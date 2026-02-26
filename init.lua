@@ -690,6 +690,7 @@ require('lazy').setup({
         'lua-language-server',
         'rust-analyzer',
         'jdtls',
+        'google-java-format',
         'stylua',
         'isort',
         'black',
@@ -788,6 +789,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        java = { 'google-java-format' },
         python = { 'isort', 'black' },
         rust = { 'rustfmt' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
