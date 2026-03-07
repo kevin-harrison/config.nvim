@@ -134,7 +134,7 @@ vim.o.wrap = false
 local function toggle_wrap()
   vim.o.wrap = not vim.o.wrap
 end
-vim.keymap.set('n', '<leader>m', toggle_wrap, { desc = 'Toggles text wrap' })
+vim.keymap.set('n', '<leader>mw', toggle_wrap, { desc = 'Toggles text wrap' })
 
 -- Add a semi-colon to the end of the current line
 local function add_semicolon()

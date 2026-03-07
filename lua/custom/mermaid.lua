@@ -120,8 +120,12 @@ function M.preview()
   local source = M.get_mermaid_source()
   if not source then return end
 
-  local tmp_mmd = os.tmpname() .. '.mmd'
-  local tmp_svg = os.tmpname() .. '.svg'
+  local tmp_base1 = os.tmpname()
+  local tmp_base2 = os.tmpname()
+  local tmp_mmd = tmp_base1 .. '.mmd'
+  local tmp_svg = tmp_base2 .. '.svg'
+  os.remove(tmp_base1)
+  os.remove(tmp_base2)
 
   local f = io.open(tmp_mmd, 'w')
   if not f then
@@ -153,7 +157,9 @@ function M.preview()
 
       cleanup_prev()
 
-      local tmp_html = os.tmpname() .. '.html'
+      local tmp_base3 = os.tmpname()
+      os.remove(tmp_base3)
+      local tmp_html = tmp_base3 .. '.html'
       local html_file = io.open(tmp_html, 'w')
       if not html_file then
         vim.notify('Failed to create HTML file', vim.log.levels.ERROR)

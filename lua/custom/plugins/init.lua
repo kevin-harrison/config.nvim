@@ -23,10 +23,11 @@ return {
   },
   {
     dir = vim.fn.stdpath('config') .. '/lua/custom',
-    name = 'mermaid-preview',
+    name = 'custom-previews',
     ft = { 'markdown', 'mermaid' },
     config = function()
       require('custom.mermaid').setup()
+      require('custom.markdown_preview').setup()
     end,
   },
 }
