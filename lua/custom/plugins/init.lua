@@ -3,5 +3,30 @@
 --
 -- See the kickstart.nvim README for more information
 return {
-  { dir = "~/code/agent-deck/nvim/agent-deck-review.nvim" },
+  { dir = '~/code/agent-deck/nvim/agent-deck-review.nvim' },
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.nvim' },
+    ft = { 'markdown' },
+    config = function(_, opts)
+      local ok, devicons = pcall(require, 'nvim-web-devicons')
+      if ok and devicons.set_icon_by_filetype then
+        devicons.set_icon_by_filetype { mermaid = 'mermaid' }
+        devicons.set_icon { mermaid = { icon = '󰐙', color = '#ff8c00', name = 'Mermaid' } }
+      end
+      require('render-markdown').setup(opts)
+    end,
+    opts = {
+      anti_conceal = { enabled = false },
+      latex = { enabled = false },
+    },
+  },
+  {
+    dir = vim.fn.stdpath('config') .. '/lua/custom',
+    name = 'mermaid-preview',
+    ft = { 'markdown', 'mermaid' },
+    config = function()
+      require('custom.mermaid').setup()
+    end,
+  },
 }
